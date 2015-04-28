@@ -84,7 +84,10 @@ class HDF5Store(compass_model.Store):
             raise ValueError(url)
         self._url = url
         path = url.replace('file://','')
-        self.f = h5py.File(path, 'r')
+        fapl = h5py.h5p.create(h5py.h5p.FILE_ACCESS)
+        fapl.set_cache(100, 100, 100000000, 0.0)
+        fid = h5py.h5f.open(path, h5py.h5f.ACC_RDONLY, fapl=fapl)
+        self.f = h5py.File(fid)
 
 
     def close(self):
@@ -196,7 +199,7 @@ class HDF5Dataset(compass_model.Array):
 
     def __init__(self, store, key):
         self._store = store
-        self._key = key
+        self._key = key        
         self._dset = store.f[key]
 
 
